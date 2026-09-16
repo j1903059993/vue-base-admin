@@ -1,10 +1,14 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import { routes } from './routes'
 import { pinia } from '@/stores'
 import { useSessionStore } from '@/stores/session'
 import { hasPermission } from '@/utils/permission'
 
-const router = createRouter({ history: createWebHistory(import.meta.env.BASE_URL), routes, scrollBehavior: () => ({ top: 0 }) })
+const history = import.meta.env.VITE_ROUTER_MODE === 'hash'
+  ? createWebHashHistory(import.meta.env.BASE_URL)
+  : createWebHistory(import.meta.env.BASE_URL)
+
+const router = createRouter({ history, routes, scrollBehavior: () => ({ top: 0 }) })
 
 router.beforeEach(to => {
   const session = useSessionStore(pinia)

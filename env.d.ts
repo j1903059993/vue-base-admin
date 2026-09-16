@@ -2,5 +2,6 @@
 
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL?: string
+  readonly VITE_ROUTER_MODE?: 'hash' | 'history'
   readonly VITE_USE_MOCK?: string
 }
