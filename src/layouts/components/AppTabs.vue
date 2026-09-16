@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import type { TabsProps } from 'ant-design-vue'
 import { useTabsStore } from '@/stores/tabs'
 const route=useRoute(); const router=useRouter(); const store=useTabsStore()
 watch(() => route.fullPath, () => { if(route.meta.title) store.visit({path:route.path,title:String(route.meta.title),closable:!route.meta.affix}) }, {immediate:true})
-function edit(path: string | MouseEvent | KeyboardEvent, action: 'add'|'remove') { if(action==='remove' && typeof path==='string'){store.close(path);if(route.path===path)router.push(store.tabs.at(-1)?.path??'/dashboard')} }
+const edit: TabsProps['onEdit'] = (target, action) => {
+  if (action === 'remove' && (typeof target === 'string' || typeof target === 'number')) {
+    const path = String(target)
+    store.close(path)
+    if (route.path === path) router.push(store.tabs.at(-1)?.path ?? '/dashboard')
+  }
+}
 </script>
 <template>
   <div class="tabs-wrap">

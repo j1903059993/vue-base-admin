@@ -7,18 +7,20 @@ import QueryPanel from '@/components/QueryPanel.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import PermissionGate from '@/components/PermissionGate.vue'
 import { seedUsers, type AdminUser } from '@/mocks/data/users'
-import type { TablePaginationConfig } from 'ant-design-vue'
+import type { TableColumnsType, TablePaginationConfig } from 'ant-design-vue'
 const users=ref<AdminUser[]>([...seedUsers]); const loading=ref(false); const selected=ref<number[]>([]); const modalOpen=ref(false); const editing=ref<number|null>(null); const query=reactive({keyword:'',status:undefined as string|undefined,department:undefined as string|undefined}); const pagination=reactive({current:1,pageSize:8})
 const form=reactive({name:'',email:'',role:'普通成员',department:'产品研发中心',status:'active'})
 const filtered=computed(()=>users.value.filter(user=>(!query.keyword||`${user.name}${user.email}`.toLowerCase().includes(query.keyword.toLowerCase()))&&(!query.status||user.status===query.status)&&(!query.department||user.department===query.department)))
 const pageRows=computed(()=>filtered.value.slice((pagination.current-1)*pagination.pageSize,pagination.current*pagination.pageSize))
-const columns=[{title:'用户',key:'user',width:220},{title:'角色',dataIndex:'role',width:130},{title:'部门',dataIndex:'department'},{title:'状态',key:'status',width:100},{title:'最近登录',dataIndex:'lastLogin',width:170},{title:'操作',key:'action',width:135,fixed:'right'}]
+const columns: TableColumnsType<AdminUser>=[{title:'用户',key:'user',width:220},{title:'角色',dataIndex:'role',width:130},{title:'部门',dataIndex:'department'},{title:'状态',key:'status',width:100},{title:'最近登录',dataIndex:'lastLogin',width:170},{title:'操作',key:'action',width:135,fixed:'right'}]
 function reset(){query.keyword='';query.status=undefined;query.department=undefined;pagination.current=1}
 async function refresh(){loading.value=true;await new Promise(resolve=>setTimeout(resolve,450));loading.value=false;message.success('数据已刷新')}
 function openCreate(){editing.value=null;Object.assign(form,{name:'',email:'',role:'普通成员',department:'产品研发中心',status:'active'});modalOpen.value=true}
 function openEdit(user:AdminUser){editing.value=user.id;Object.assign(form,user);modalOpen.value=true}
 function save(){if(!form.name||!form.email){message.warning('请填写姓名和邮箱');return}if(editing.value){const index=users.value.findIndex(item=>item.id===editing.value);users.value[index]={...users.value[index],...form} as AdminUser}else users.value.unshift({id:Date.now(),...form,status:form.status as AdminUser['status'],lastLogin:'尚未登录'});modalOpen.value=false;message.success(editing.value?'用户已更新':'用户已创建')}
 function remove(user:AdminUser){Modal.confirm({title:`确认删除 ${user.name}？`,content:'删除后无法恢复，此操作仅影响本地演示数据。',okType:'danger',onOk:()=>{users.value=users.value.filter(item=>item.id!==user.id);message.success('用户已删除')}})}
+function editRecord(record: Record<string, unknown>) { openEdit(record as unknown as AdminUser) }
+function removeRecord(record: Record<string, unknown>) { remove(record as unknown as AdminUser) }
 </script>
 <template>
   <PageContainer
@@ -101,7 +103,7 @@ function remove(user:AdminUser){Modal.confirm({title:`确认删除 ${user.name}�
             <a-button
               type="link"
               size="small"
-              @click="openEdit(record)"
+              @click="editRecord(record)"
             >
               编辑
             </a-button><PermissionGate permission="system:user:delete">
@@ -109,7 +111,7 @@ function remove(user:AdminUser){Modal.confirm({title:`确认删除 ${user.name}�
                 type="link"
                 danger
                 size="small"
-                @click="remove(record)"
+                @click="removeRecord(record)"
               >
                 删除
               </a-button>
@@ -130,26 +132,37 @@ function remove(user:AdminUser){Modal.confirm({title:`确认删除 ${user.name}�
         <div class="form-row">
           <a-form-item
             label="姓名"
+            name="name"
             required
           >
             <a-input v-model:value="form.name" />
           </a-form-item><a-form-item
             label="邮箱"
+            name="email"
             required
           >
             <a-input v-model:value="form.email" />
           </a-form-item>
-        </div><a-form-item label="角色">
+        </div><a-form-item
+          label="角色"
+          name="role"
+        >
           <a-select
             v-model:value="form.role"
             :options="['超级管理员','运营管理员','审计员','普通成员'].map(value=>({label:value,value}))"
           />
-        </a-form-item><a-form-item label="部门">
+        </a-form-item><a-form-item
+          label="部门"
+          name="department"
+        >
           <a-select
             v-model:value="form.department"
             :options="['产品研发中心','用户运营部','风险控制部','数据平台组'].map(value=>({label:value,value}))"
           />
-        </a-form-item><a-form-item label="账号状态">
+        </a-form-item><a-form-item
+          label="账号状态"
+          name="status"
+        >
           <a-radio-group v-model:value="form.status">
             <a-radio value="active">
               启用

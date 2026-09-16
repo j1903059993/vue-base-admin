@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { useSettingsStore, type ThemeMode } from '@/stores/settings'
+import type { RadioChangeEvent } from 'ant-design-vue'
 defineProps<{ open:boolean }>(); const emit=defineEmits<{ close:[] }>(); const settings=useSettingsStore()
 const colors=['#4f46e5','#2563eb','#0891b2','#0f9f75','#d97706','#dc3545']
+function changeDensity(event: RadioChangeEvent) {
+  settings.setDensity(event.target.value as 'small' | 'middle' | 'large')
+}
 </script>
 <template>
   <a-drawer
@@ -34,7 +38,7 @@ const colors=['#4f46e5','#2563eb','#0891b2','#0f9f75','#d97706','#dc3545']
       <label>界面密度</label><a-radio-group
         :value="settings.density"
         button-style="solid"
-        @change="(event: Event & { target: HTMLInputElement })=>settings.setDensity(event.target.value as 'small' | 'middle' | 'large')"
+        @change="changeDensity"
       >
         <a-radio-button value="small">
           紧凑

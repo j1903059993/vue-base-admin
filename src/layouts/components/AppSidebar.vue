@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import type { MenuProps } from 'ant-design-vue'
 import { DashboardOutlined, TableOutlined, FormOutlined, SafetyCertificateOutlined, TeamOutlined, IdcardOutlined, MenuOutlined, PieChartOutlined } from '@ant-design/icons-vue'
 import BrandMark from '@/components/BrandMark.vue'
 import { childRoutes } from '@/router/routes'
@@ -24,7 +25,10 @@ const menuItems = computed(() => {
   }))
   return [...singles.slice(0, 1), ...groups, ...singles.slice(1)]
 })
-function select({ key }: { key: string }) { router.push(key); emit('navigate') }
+const select: MenuProps['onSelect'] = ({ key }) => {
+  router.push(String(key))
+  emit('navigate')
+}
 </script>
 
 <template>
